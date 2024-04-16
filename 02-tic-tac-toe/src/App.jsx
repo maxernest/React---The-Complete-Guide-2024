@@ -1,5 +1,6 @@
 import { useState } from "react";
 import TitleImage from "/game-logo.png";
+import { unstable_renderSubtreeIntoContainer } from "react-dom";
 function Header() {
   return (
     <header>
@@ -11,18 +12,30 @@ function Header() {
 
 function Player({ name, symbol }) {
   const [isEdited, setIsEdited] = useState(false);
+  const [tempName, setTempName] = useState(name);
 
   function onEdit() {
     setIsEdited((edit) => !edit);
+  }
+
+  function handleOnChange(event) {
+    console.log(event);
+    setTempName(event.target.value);
   }
 
   function nameSection() {
     return (
       <>
         {isEdited ? (
-          <input type="text" id="fname" name="fname" defaultValue={name} />
+          <input
+            type="text"
+            id="fname"
+            name="fname"
+            value={tempName}
+            onChange={handleOnChange}
+          />
         ) : (
-          <span className="player-name">{name}</span>
+          <span className="player-name">{tempName}</span>
         )}
       </>
     );
@@ -47,22 +60,44 @@ function Players({ player }) {
 }
 
 function GameBoard() {
+  const [gameBoard, setGameBoard] = useState([
+    [null, null, null],
+    [null, null, null],
+    [null, null, null],
+  ]);
+
+  function handleClick(vertical, horizontal, e) {
+    console.log(e.target.innerHTML);
+    setGameBoard((gameBoard) => {
+      const newGameBoard = [...gameBoard];
+      newGameBoard[vertical][horizontal] = "X";
+      return newGameBoard;
+    });
+  }
   return (
-    <div id="game-board">
-      <ol>
-        <button>x</button>
-        <button>x</button>
-        <button>x</button>
-
-        <button>x</button>
-        <button>x</button>
-        <button>x</button>
-
-        <button>x</button>
-        <button>x</button>
-        <button>x</button>
-      </ol>
-    </div>
+    <ol id="game-board">
+      {gameBoard.map((value, verticalIndex) => {
+        return (
+          <li>
+            <ol>
+              {value.map((value, horizontalIndex) => {
+                return (
+                  <li>
+                    <button
+                      onClick={(e) =>
+                        handleClick(verticalIndex, horizontalIndex, e)
+                      }
+                    >
+                      {value}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 

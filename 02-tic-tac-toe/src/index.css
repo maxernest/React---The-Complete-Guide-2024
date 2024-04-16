@@ -174,7 +174,7 @@ ol {
   flex-wrap: wrap;
   justify-content: center;
   gap: 2rem;
-  margin: 3em;
+  margin: 0;
   padding: 0;
 }
 
