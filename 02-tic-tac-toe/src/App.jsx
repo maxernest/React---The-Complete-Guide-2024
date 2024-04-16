@@ -10,7 +10,7 @@ function Header() {
   );
 }
 
-function Player({ name, symbol }) {
+function Player({ name, symbol, isActive }) {
   const [isEdited, setIsEdited] = useState(false);
   const [tempName, setTempName] = useState(name);
 
@@ -42,7 +42,7 @@ function Player({ name, symbol }) {
   }
 
   return (
-    <li className="player">
+    <li className={isActive ? "player active" : "player"}>
       {nameSection()}
       <span className="player-symbol">{symbol}</span>
       <button onClick={onEdit}>{isEdited ? "save" : "edit"}</button>
@@ -50,30 +50,28 @@ function Player({ name, symbol }) {
   );
 }
 
-function Players({ player }) {
+function Players({ currentPlayer }) {
   return (
-    <ol id="players">
-      <Player name={player[0]} symbol="X" />
-      <Player name={player[1]} symbol="O" />
+    <ol id="players" className="highlight-player">
+      <Player name="player one" symbol="X" isActive={currentPlayer == "X"} />
+      <Player name="player two" symbol="O" isActive={currentPlayer == "O"} />
     </ol>
   );
 }
 
-function GameBoard() {
-  const [gameBoard, setGameBoard] = useState([
+function GameBoard({ turns, onClick }) {
+  const initialGameBoard = [
     [null, null, null],
     [null, null, null],
     [null, null, null],
-  ]);
+  ];
 
-  function handleClick(vertical, horizontal, e) {
-    console.log(e.target.innerHTML);
-    setGameBoard((gameBoard) => {
-      const newGameBoard = [...gameBoard];
-      newGameBoard[vertical][horizontal] = "X";
-      return newGameBoard;
-    });
-  }
+  const gameBoard = initialGameBoard;
+
+  turns.forEach((turn) => {
+    gameBoard[turn.row][turn.col] = turn.player;
+  });
+
   return (
     <ol id="game-board">
       {gameBoard.map((value, verticalIndex) => {
@@ -84,9 +82,8 @@ function GameBoard() {
                 return (
                   <li>
                     <button
-                      onClick={(e) =>
-                        handleClick(verticalIndex, horizontalIndex, e)
-                      }
+                      disabled={value}
+                      onClick={() => onClick(verticalIndex, horizontalIndex)}
                     >
                       {value}
                     </button>
@@ -101,21 +98,34 @@ function GameBoard() {
   );
 }
 
-function GameContainer() {
-  const [player, setPlayer] = useState(["test", "two"]);
+function getCurrentPlayer(turns) {
+  let currentPlayer = "X";
+  if (turns.length > 0 && turns[0].player == "X") {
+    currentPlayer = "O";
+  }
+  return currentPlayer;
+}
 
+function GameContainer({ turns, handleTurns }) {
   return (
     <div id="game-container">
-      <Players player={player} />
-      <GameBoard />
+      <Players currentPlayer={getCurrentPlayer(turns)} />
+      <GameBoard turns={turns} onClick={handleTurns} />
       {/* <GameOver /> */}
     </div>
   );
 }
 
-function Logs() {
+function Logs({ turns }) {
   return (
     <div id="log">
+      {turns.map((turn) => {
+        return (
+          <li>
+            `{turn.player} clicked {turn.row}, {turn.col}`
+          </li>
+        );
+      })}
       <li>tes</li>
     </div>
   );
@@ -132,11 +142,22 @@ function GameOver() {
 }
 
 function App() {
+  const [turns, setTurns] = useState([]);
+
+  function handleTurns(row, col) {
+    setTurns((turns) => {
+      let currentPlayer = getCurrentPlayer(turns);
+      const updatedTurns = [...turns];
+      updatedTurns.unshift({ row: row, col: col, player: currentPlayer });
+      return updatedTurns;
+    });
+  }
+
   return (
     <>
       <Header />
-      <GameContainer />
-      <Logs />
+      <GameContainer turns={turns} handleTurns={handleTurns} />
+      <Logs turns={turns} />
     </>
   );
 }
