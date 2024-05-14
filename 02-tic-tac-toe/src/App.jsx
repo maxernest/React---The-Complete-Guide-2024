@@ -98,6 +98,57 @@ function GameBoard({ turns, onClick }) {
   );
 }
 
+function isFinish(turns) {
+  if (turns.length < 5) {
+    return null;
+  }
+  const initialGameBoard = [
+    [null, null, null],
+    [null, null, null],
+    [null, null, null],
+  ];
+
+  const gameBoard = initialGameBoard;
+
+  turns.forEach((turn) => {
+    gameBoard[turn.row][turn.col] = turn.player == "X" ? 1 : -1;
+  });
+
+  for (let i = 0; i < 3; i++) {
+    let sum = gameBoard[0][i] + gameBoard[1][i] + gameBoard[2][i];
+    if (sum == 3) {
+      return "X";
+    } else if (sum == -3) {
+      return "O";
+    }
+
+    sum = gameBoard[i][0] + gameBoard[i][1] + gameBoard[i][2];
+    if (sum == 3) {
+      return "X";
+    } else if (sum == -3) {
+      return "O";
+    }
+  }
+
+  let diagonal = gameBoard[0][0] + gameBoard[1][1] + gameBoard[2][2];
+  if (diagonal == 3) {
+    return "X";
+  } else if (diagonal == -3) {
+    return "O";
+  }
+
+  diagonal = gameBoard[0][2] + gameBoard[1][1] + gameBoard[2][0];
+  if (diagonal == 3) {
+    return "X";
+  } else if (diagonal == -3) {
+    return "O";
+  }
+  if (turns.length == 9) {
+    return "draw";
+  }
+  return null;
+}
+
 function getCurrentPlayer(turns) {
   let currentPlayer = "X";
   if (turns.length > 0 && turns[0].player == "X") {
@@ -107,11 +158,15 @@ function getCurrentPlayer(turns) {
 }
 
 function GameContainer({ turns, handleTurns }) {
+  console.log(isFinish(turns));
+
   return (
     <div id="game-container">
       <Players currentPlayer={getCurrentPlayer(turns)} />
       <GameBoard turns={turns} onClick={handleTurns} />
-      {/* <GameOver /> */}
+      {!isFinish(turns) || (
+        <GameOver player={isFinish(turns)} handleTurns={handleTurns} />
+      )}
     </div>
   );
 }
@@ -126,17 +181,16 @@ function Logs({ turns }) {
           </li>
         );
       })}
-      <li>tes</li>
     </div>
   );
 }
 
-function GameOver() {
+function GameOver({ player, handleTurns }) {
   return (
     <div id="game-over">
       <h2>Game Over!</h2>
-      <p>tes won!</p>
-      <button>Rematch!</button>
+      {player == "X" || player == "O" ? <p>{player} won!</p> : <p>draw</p>}
+      <button onClick={() => handleTurns(null, null)}>Rematch!</button>
     </div>
   );
 }
@@ -145,6 +199,10 @@ function App() {
   const [turns, setTurns] = useState([]);
 
   function handleTurns(row, col) {
+    if (row == null && col == null) {
+      setTurns([]);
+      return;
+    }
     setTurns((turns) => {
       let currentPlayer = getCurrentPlayer(turns);
       const updatedTurns = [...turns];
