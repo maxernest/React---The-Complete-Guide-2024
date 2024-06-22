@@ -1,4 +1,4 @@
-export default function Sidebar() {
+export default function Sidebar({ projectNames, updateDashboard }) {
   return (
     <>
       <button
@@ -26,31 +26,37 @@ export default function Sidebar() {
 
       <aside
         id="logo-sidebar"
-        className="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
+        className="bg-zinc-200 fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0"
         aria-label="Sidebar"
       >
-        <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+        <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
           <h5
             id="drawer-navigation-label"
-            class="text-base font-bold uppercase mb-5"
+            className="text-base font-bold uppercase mb-5"
           >
             YOUR PROJECTS
           </h5>
           <button
             type="button"
             className="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700 mb-10"
+            onClick={() => updateDashboard("addDashboard")}
           >
             + Add Project
           </button>
           <ul className="space-y-2 font-medium">
-            <li>
-              <a
-                href="#"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-              >
-                <span className="ms-3">Dashboard</span>
-              </a>
-            </li>
+            {projectNames.map((projectName, index) => (
+              <li key={index}>
+                <a
+                  onClick={(e) => {
+                    e.preventDefault();
+                    updateDashboard(projectName);
+                  }}
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                >
+                  <span className="ms-3">{projectName}</span>
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       </aside>
